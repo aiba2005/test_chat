@@ -1,9 +1,9 @@
 from fastapi import HTTPException, Depends, APIRouter
-from mysite.db.models import ChatGroup, UserProfile, StatusChoices
-from mysite.db.schema import ChatGroupCreateSchema, ChatGroupOutSchema
+from mysite.db.models import ChatGroup, UserProfile, StatusChoices, ChatMessage
+from mysite.db.schema import ChatGroupCreateSchema, ChatGroupOutSchema, ChatMessageOutSchema
 from mysite.db.database import SessionLocal
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Dict, Any
 
 
 async def get_db():
@@ -50,12 +50,18 @@ async def group_list(db: Session = Depends(get_db)):
     return db.query(ChatGroup).all()
 
 
-@group_router.get('/{group_id}', response_model=ChatGroupOutSchema)
+@group_router.get('/{group_id}', response_model=Dict[str, Any])
 async def group_detail(group_id: int, db: Session = Depends(get_db)):
     group_db = db.query(ChatGroup).filter(ChatGroup.id == group_id).first()
     if not group_db:
         raise HTTPException(status_code=404, detail='Группа табылган жок')
-    return group_db
+
+    messages = db.query(ChatMessage).filter(ChatMessage.group_id == group_id).all()
+
+    return {
+        'group': ChatGroupOutSchema.from_orm(group_db),
+        'messages': [ChatMessageOutSchema.from_orm(msg) for msg in messages]
+    }
 
 
 @group_router.put('/{group_id}', response_model=ChatGroupOutSchema)

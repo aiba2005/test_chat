@@ -8,6 +8,17 @@ class StatusChoices(str, Enum):
     admin = 'admin'
     simple = 'simple'
 
+class ChatMessageOutSchema(BaseModel):
+    id: int
+    group_id: int
+    user_id: int
+    text: str
+    created_date: datetime
+
+    class Config:
+        from_attributes = True
+
+
 
 class UserProfileCreateSchema(BaseModel):
     username: str
@@ -83,12 +94,4 @@ class ChatMessageCreateSchema(BaseModel):
         from_attributes = True
 
 
-class ChatMessageOutSchema(BaseModel):
-    id: int
-    group_id: int
-    user_id: int
-    text: str
-    created_date: datetime
 
-    class Config:
-        from_attributes = True
