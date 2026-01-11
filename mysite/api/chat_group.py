@@ -1,5 +1,5 @@
 from fastapi import HTTPException, Depends, APIRouter
-from mysite.db.models import ChatGroup, UserProfile, StatusChoices, ChatMessage
+from mysite.db.models import ChatGroup, UserProfile, StatusChoices, ChatMessage, GroupPeople
 from mysite.db.schema import ChatGroupCreateSchema, ChatGroupOutSchema, ChatMessageOutSchema
 from mysite.db.database import SessionLocal
 from sqlalchemy.orm import Session
@@ -58,9 +58,13 @@ async def group_detail(group_id: int, db: Session = Depends(get_db)):
 
     messages = db.query(ChatMessage).filter(ChatMessage.group_id == group_id).all()
 
+    people_count = db.query(GroupPeople).filter(GroupPeople.group_id == group_id).count()
+
     return {
         'group': ChatGroupOutSchema.from_orm(group_db),
-        'messages': [ChatMessageOutSchema.from_orm(msg) for msg in messages]
+        'messages': [ChatMessageOutSchema.from_orm(msg) for msg in messages],
+        'people_count': people_count
+
     }
 
 
